@@ -2,9 +2,10 @@ module Lingua::EN::Sentence:auth<LlamaRider>;
 use v6;
 
 my Str $EOS="\001";
-token AP { [<[\'\"»\)\]\}]>]? } ## AFTER PUNCTUATION
-token PAP { [<punct> AP]? };
-token alphad { <.alpha>|'-' }
+my token termpunct { <[.?!]> }
+my token AP { [<['"»)\]}]>]? } ## AFTER PUNCTUATION
+my token PAP { <termpunct> <AP> };
+my token alphad { <.alpha>|'-' }
 
 my @PEOPLE = <jr mr mrs ms dr prof sr sens? reps? gov attys? supt det rev>;
 my @ARMY = <col gen lt cmdr adm capt sgt cpl maj>;
@@ -40,8 +41,7 @@ sub get_sentences(Str $text) is export {
   if ($text.defined) {
     my $marked_text = first_sentence_breaking($text);
     my $fixed_marked_text = remove_false_end_of_sentence($marked_text);
-    $fixed_marked_text = split_unsplit_stuff($fixed_marked_text);
-    @sentences = split(/$EOS/,$fixed_marked_text).map(clean_sentences($_));
+    @sentences = clean_sentences(split(/$EOS/,$fixed_marked_text));
   }
   return @sentences;
 }
@@ -54,38 +54,39 @@ sub get_sentences(Str $text) is export {
 #==============================================================================
 
 ## Please email me any suggestions for optimizing these RegExps.
-sub remove_false_end_of_sentence(Str $s) {
+sub remove_false_end_of_sentence(Str $request) {
 ##	## don't do u.s.a.
-  $s ~~ s:g/(<-alphad><.alpha><.PAP>\s)$EOS/, $1);
-  $s ~~ s:g/(<-alphad><.alpha><.punct>)$EOS/$1/;
+  my $s = $request;
+  $s ~~ s:g/(<!&alphad>.<.alpha><.PAP><.space>)$EOS/$0/;
+  $s ~~ s:g/(<!&alphad>.<.alpha><.termpunct>)$EOS/$0/;
   # don't split after a white-space followed by a single letter followed
   # by a dot followed by another whitespace.
-  $s ~~ s:g/(<.space><.alpha>'.'<.space>+)$EOS/$1/;
+  $s ~~ s:g/(<.space><.alpha>'.'<.space>+)$EOS/$0/;
 
   # fix: bla bla... yada yada
   $s ~~ s:g/'...' $EOS <lower>/...$<lower>/;
   # fix "." "?" "!"
-  $s ~~ s:g/(['"]<.punct>['"]\s+)$EOS/$1/;
+  $s ~~ s:g/(<['"]><.termpunct><['"]><.space>+)$EOS/$0/;
   ## fix where abbreviations exist
-  foreach (@ABBREVIATIONS) { $s ~~ s:g:i/(\b$_<.PAP>\s)$EOS/$1/; }
-	
+  for @ABBREVIATIONS -> $abbr { $s ~~ s:g:i/<<($abbr <.PAP> <.space>)$EOS/$0/; }
+  
   # don't break after quote unless its a capital letter.
-  $s ~~ s:g/(["']\s*)$EOS(\s*[[:lower:]])/$1$2/;
+  $s ~~ s:g/(<["']><.space>*)$EOS(<.space>*<lower>)/$0$1/;
 
   # don't break: text . . some more text.
-  $s ~~ s:g/(\s\.\s)$EOS(\s*)/$1$2/;
+  $s ~~ s:g/(<.space>'.'<.space>)$EOS(<.space>*)/$0$1/;
 
-  $s ~~ s:g/(\s<.PAP>\s)$EOS/$1/;
+  $s ~~ s:g/(<.space><.PAP><.space>)$EOS/$0/;
 
   return $s;
 }
 
-# TODO:
-sub split_unsplit_stuff(Str $text) {
-  $text ~~ s:g/(\D\d+)(<.punct>)(\s+)/$1$2$EOS$3/;
-  $text ~~ s:g/(<.PAP>\s)(\s*\()/$1$EOS$2/;
-  $text ~~ s:g/('\w<.punct>)(\s)/$1$EOS$2/;
-  $text ~~ s:g:i/(\sno\.)(\s+)(?!\d)/$1$EOS$2/;
+sub mark_splits(Str $request) {
+  my $text = $request;
+  $text ~~ s:g/(\D\d+)<termpunct>(<.space>+)/$0$<termpunct>$EOS$1/;
+  $text ~~ s:g/(<.PAP><.space>)(<.space>*\()/$0$EOS$1/;
+  $text ~~ s:g/(<[']><.alpha><.termpunct>)<space>/$0$EOS$<space>/;
+  $text ~~ s:g:i/(<.space>'no.')(<.space>+)<!before \d>/$0$EOS$1/;
   ##	# split where single capital letter followed by dot makes sense to break.
   ##	# notice these are exceptions to the general rule NOT to split on single
   ##	# letter.
@@ -95,11 +96,10 @@ sub split_unsplit_stuff(Str $text) {
   ##	# the rule will not split on names begining or containing 
   ##	# single capital letter dot in the first or second name
   ##	# assuming 2 or three word name.
-  ##	$text=~s/(\s[[:lower:]]\w+\s+[^[[:^upper:]M]\.)(?!\s+[[:upper:]]\.)/$1$EOS/sg;
-  
-  # add EOS when you see "a.m." or "p.m." followed by a capital letter.
-  $text ~~ s:g/([ap]\.m\.\s+)([[:upper:]])/$1$EOS$2/;
-  
+  ##	$text=~s/(<.space><lower><.alpha>+<.space>+<-[<upper>M]>'.')(?!<.space>+<upper>'.')/$1$EOS/sg;
+
+ # add EOS when you see "a.m." or "p.m." followed by a capital letter.
+ $text ~~ s:g/(<[ap]>'.m.'<.space>+)<upper>/$0$EOS$<upper>/;
   return $text;
 }
 
@@ -107,11 +107,11 @@ sub clean_sentences(@sentences) {
   return @sentences.grep({.defined and .match(/<.alpha>/)}).map:{.trim };
 }
 
-#TODO
-sub first_sentence_breaking(Str $text) {
-  $text ~~ s:g/\n\s*\n/$EOS/;	## double new-line means a different sentence.
-  $text ~~ s:g/(<.PAP>\s)/$1$EOS/;
-  $text ~~ s:g/(\s<.alpha><.punct>)/$1$EOS/; # breake also when single letter comes before punc.
+sub first_sentence_breaking(Str $request) {
+  my Str $text = $request;
+  $text ~~ s:g/\n<.space>*\n/$EOS/; #double new-line means a different sentence.
+  $text ~~ s:g/(<.PAP><.space>)/$0$EOS/;
+  $text ~~ s:g/(<.space><.alpha><.termpunct>)/$0$EOS/; # breake also when single letter comes before punc.
   return $text;
 }
 
@@ -138,7 +138,7 @@ Certain well know exceptions, such as abreviations, may cause incorrect segmenta
 
 =head1 ALGORITHM
 
-Basically, I use a 'brute' regular expression to split the text into sentences.  (Well, nothing is yet split - I just mark the end-of-sentence).  Then I look into a set of rules which decide when an end-of-sentence is justified and when it's a mistake. In case of a mistake, the end-of-sentence mark is removed. 
+Basically, I use a 'brute' regular expression to split the text into sentences.  (Well, nothing is yet split - I just mark the end-of-sentence).  Then I look into a set of rules which decide when an end-of-sentence is justified and when it's a mistake. In case of a mistake\, the end-of-sentence mark is removed. 
 
 What are such mistakes? Cases of abbreviations, for example. I have a list of such abbreviations (Please see `Acronym/Abbreviations list' section), and more general rules (for example, the abbreviations 'i.e.' and '.e.g.' need not to be in the list as a special rule takes care of all single letter abbreviations).
 

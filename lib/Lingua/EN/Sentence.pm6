@@ -1,7 +1,7 @@
 module Lingua::EN::Sentence:auth<LlamaRider>;
 use v6;
 
-my Str $EOS="\001";
+my Str $EOS="\0\0\0";
 my token termpunct { <[.?!]> }
 my token AP { [<['"»)\]}]>]? } ## AFTER PUNCTUATION
 my token PAP { <termpunct> <AP> };
@@ -46,6 +46,12 @@ sub get_sentences(Str $text) is export {
   return @sentences;
 }
 
+#------------------------------------------------------------------------------
+# augmenting the default Str class with a .sentences methods, 
+# for extra convenience. Sweet!
+#------------------------------------------------------------------------------
+use MONKEY_TYPING;
+augment class Str { method sentences { return get_sentences(self); } }
 
 #==============================================================================
 #
@@ -54,8 +60,8 @@ sub get_sentences(Str $text) is export {
 #==============================================================================
 
 ## Please email me any suggestions for optimizing these RegExps.
-sub remove_false_end_of_sentence(Str $request) {
-##	## don't do u.s.a.
+sub remove_false_end_of_sentence(Str $request) is export {
+  ## don't split at u.s.a.
   my $s = $request;
   $s ~~ s:g/(<!&alphad>.<.alpha><.PAP><.space>)$EOS/$0/;
   $s ~~ s:g/(<!&alphad>.<.alpha><.termpunct>)$EOS/$0/;
@@ -65,17 +71,15 @@ sub remove_false_end_of_sentence(Str $request) {
 
   # fix: bla bla... yada yada
   $s ~~ s:g/'...' $EOS <lower>/...$<lower>/;
-  # fix "." "?" "!"
+  ## fix "." "?" "!"
   $s ~~ s:g/(<['"]><.termpunct><['"]><.space>+)$EOS/$0/;
   ## fix where abbreviations exist
   for @ABBREVIATIONS -> $abbr { $s ~~ s:g:i/<<($abbr <.PAP> <.space>)$EOS/$0/; }
-  
-  # don't break after quote unless its a capital letter.
+  ## don't break after quote unless its a capital letter.
   $s ~~ s:g/(<["']><.space>*)$EOS(<.space>*<lower>)/$0$1/;
 
-  # don't break: text . . some more text.
+  ## don't break: text . . some more text.
   $s ~~ s:g/(<.space>'.'<.space>)$EOS(<.space>*)/$0$1/;
-
   $s ~~ s:g/(<.space><.PAP><.space>)$EOS/$0/;
 
   return $s;
@@ -199,6 +203,7 @@ If I come across a good general-purpose list - I'll incorporate it into this mod
 Feel free to suggest such lists. 
 
 =head1 FUTURE WORK
+
 [1] Object Oriented like usage
 [2] Supporting more than just English/French
 [3] Code optimization. Currently everything is RE based and not so optimized RE

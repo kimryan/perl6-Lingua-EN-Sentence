@@ -1,0 +1,4 @@
+use v6;
+
+my $text = "Some awful text is written here. Split it if you dare. But dare you Mr. Anderson? No! You don't."
+

@@ -4,7 +4,6 @@ use Lingua::EN::Sentence;
 
 my @tests = dir 't/data', test => /'.txt' $$/;
 
-say @tests.elems;
 plan @tests.elems;
 
 

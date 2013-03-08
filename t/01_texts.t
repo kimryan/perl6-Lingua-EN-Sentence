@@ -20,5 +20,5 @@ for @tests.sort -> $test {
        $diff ~= "Expected: $s1\nGot: $s2\n"; 
      }
  }
- is($expected_diff,$diff,$name);
+ is($diff,$expected_diff,$name);
 }

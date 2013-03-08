@@ -21,7 +21,7 @@ for @tests -> $test {
        $diff ~= "Expected: $s1\nGot: $s2\n"; 
      }
  }
- is($expected_diff,$diff);
+ is($expected_diff,$diff,$name);
 }
 
 # my $fh = open 't/data/new.sents', :w;

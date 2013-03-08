@@ -18,10 +18,11 @@ my @PLACES = <arc al ave blv blvd cl ct cres dr exp expy dist mt ft fwy fy
  Mich Minn Miss Mo Mont Neb Nebr Nev Mex Okla Ok Ore Penna Penn Pa
  Dak Tenn Tex Ut Vt Va Wash Wis Wisc Wy Wyo USAFA Alta Man Ont Qué
  Sask Yuk>;
+my @MATH = <fig eq sec i'.'e e'.'g P'-'a'.'s cf Thm Def Conj resp>;
 my @MONTHS = <jan feb mar apr may jun jul aug sep oct nov dec sept>;
-my @MISC = <vs etc no esp>;
+my @MISC = <vs no esp>;
 
-my Str @ABBREVIATIONS = (@PEOPLE, @ARMY, @INSTITUTES, @COMPANIES, @PLACES, @MONTHS, @MISC ).map({.lc}).sort;
+my Str @ABBREVIATIONS = (@PEOPLE, @ARMY, @INSTITUTES, @COMPANIES, @PLACES, @MONTHS, @MATH, @MISC ).map({.lc}).sort;
 my $acronym_regexp = array_to_regexp(@ABBREVIATIONS);
 
 sub add_acronyms(*@new_acronyms) is export {
@@ -154,6 +155,7 @@ sub first_sentence_breaking(Str $request) {
   $text ~~ s:g/\n<.space>*\n/$EOS/; #double new-line means a different sentence.
   $text ~~ s:g/(<.PAP><.space>)/$0$EOS/;
   $text ~~ s:g/(<.space><.alpha><.termpunct>)/$0$EOS/; # breake also when single letter comes before punc.
+  $text ~~ s:g/(<.alpha><.space><.termpunct>)/$0$EOS/; # Typos such as " arrived .Then "
   return $text;
 }
 

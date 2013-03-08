@@ -7,12 +7,13 @@ my token AP { [<['"»)\]}]>]? } ## AFTER PUNCTUATION
 my token PAP { <termpunct> <AP> };
 my token alphad { <.alpha>|'-' }
 
-my @PEOPLE = <jr mr mrs ms dr prof sr sens? reps? gov attys? supt det rev>;
+my @PEOPLE = <jr mr mrs ms dr prof sr sen sens rep reps gov atty attys
+ supt det rev>;
 my @ARMY = <col gen lt cmdr adm capt sgt cpl maj>;
 my @INSTITUTES = <dept univ assn bros>;
 my @COMPANIES = <inc ltd co corp>;
-my @PLACES = <arc al ave blv?d cl ct cres dr expy? dist mt ft fw?y
- hwa?y la pde? pl plz rd st tce Ala Ariz Ark Cal Calif Col Colo Conn
+my @PLACES = <arc al ave blv blvd cl ct cres dr exp expy dist mt ft fwy fy
+ hwy hway la pd pde pl plz rd st tce Ala Ariz Ark Cal Calif Col Colo Conn
  Del Fed Fla Ga Ida Id Ill Ind Ia Kan Kans Ken Ky La Me Md Is Mass 
  Mich Minn Miss Mo Mont Neb Nebr Nev Mex Okla Ok Ore Penna Penn Pa
  Dak Tenn Tex Ut Vt Va Wash Wis Wisc Wy Wyo USAFA Alta Man Ont Qué
@@ -20,12 +21,18 @@ my @PLACES = <arc al ave blv?d cl ct cres dr expy? dist mt ft fw?y
 my @MONTHS = <jan feb mar apr may jun jul aug sep oct nov dec sept>;
 my @MISC = <vs etc no esp>;
 
-my Str @ABBREVIATIONS = (@PEOPLE, @ARMY, @INSTITUTES, @COMPANIES, @PLACES, @MONTHS, @MISC );
+my Str @ABBREVIATIONS = (@PEOPLE, @ARMY, @INSTITUTES, @COMPANIES, @PLACES, @MONTHS, @MISC ).map({.lc}).sort;
+my $acronym_regexp = array_to_regexp(@ABBREVIATIONS);
 
 sub add_acronyms(*@new_acronyms) is export {
-  push @ABBREVIATIONS, @new_acronyms; }
+  push @ABBREVIATIONS, @new_acronyms;
+  $acronym_regexp = array_to_regexp(@ABBREVIATIONS);
+}
 sub get_acronyms() is export {return @ABBREVIATIONS;}
-sub set_acronyms(*@new_acronyms) is export {@ABBREVIATIONS=@new_acronyms;}
+sub set_acronyms(*@new_acronyms) is export {
+  @ABBREVIATIONS=@new_acronyms;
+  $acronym_regexp = array_to_regexp(@ABBREVIATIONS);
+}
 sub get_EOS() is export {return $EOS;}
 sub set_EOS(Str $end_marker) is export {$EOS=$end_marker;}
 
@@ -60,11 +67,42 @@ augment class Str { method sentences { return get_sentences(self); } }
 #==============================================================================
 
 ## Please email me any suggestions for optimizing these RegExps.
-sub remove_false_end_of_sentence(Str $request) is export {
+
+# Compile the abbreviations array into a regexp, to gain performance
+sub array_to_regexp(Str @a) {
+  # <$acronym_regexp> doesn't play nice with :i for now... working around it:
+  return eval("rx:i/" ~ array_to_rxstring(@a) ~ "/;");
+}
+sub array_to_rxstring(Str @a) {
+  return '' if @a.elems < 1;
+  my @group = (shift @a);
+  my $lead_letter = @group[0].substr(0,1);
+  while (@a.elems and  (@a[0].substr(0,1) eq $lead_letter)) {
+    push @group, (shift @a);
+  }
+  my Str $regexp_head;
+  if (@group.elems > 1) {
+    my Str @subgroup = @group.map:{$_.substr(1,*-0)};
+    my $modifier='';
+    if (@subgroup[0].chars < 1 ) { $modifier='?';}
+    @subgroup = @subgroup.grep({$_.chars > 0});
+    # Recurse if multiple acronyms share the lead letter:
+    if (@subgroup.elems > 0) {
+      $regexp_head = $lead_letter ~ "[" ~ array_to_rxstring(@subgroup) ~ "]" ~  $modifier; }
+    else {
+      $regexp_head = @group[0];
+    }
+  } else {
+    $regexp_head = @group[0];
+  }
+  my Str $regexp_tail = array_to_rxstring(@a);
+  return $regexp_tail ?? $regexp_head ~ '||' ~ $regexp_tail !! $regexp_head;
+}
+
+sub remove_false_end_of_sentence(Str $request) {
   ## don't split at u.s.a.
   my $s = $request;
-  $s ~~ s:g/(<!&alphad>.<.alpha><.PAP><.space>)$EOS/$0/;
-  $s ~~ s:g/(<!&alphad>.<.alpha><.termpunct>)$EOS/$0/;
+  $s ~~ s:g/(<!&alphad>.<.alpha>(<.termpunct>[<.AP><space>]?))$EOS/$0/;
   # don't split after a white-space followed by a single letter followed
   # by a dot followed by another whitespace.
   $s ~~ s:g/(<.space><.alpha>'.'<.space>+)$EOS/$0/;
@@ -72,14 +110,14 @@ sub remove_false_end_of_sentence(Str $request) is export {
   # fix: bla bla... yada yada
   $s ~~ s:g/'...' $EOS <lower>/...$<lower>/;
   ## fix "." "?" "!"
-  $s ~~ s:g/(<['"]><.termpunct><['"]><.space>+)$EOS/$0/;
+  $s ~~ s:g/(<['"]><.termpunct><['"]><.space>)$EOS/$0/;
   ## fix where abbreviations exist
-  for @ABBREVIATIONS -> $abbr { $s ~~ s:g:i/<<($abbr <.PAP> <.space>)$EOS/$0/; }
+  $s ~~ s:g:i/<<(<$acronym_regexp> <.PAP> <.space>)$EOS/$0/;
   ## don't break after quote unless its a capital letter.
   $s ~~ s:g/(<["']><.space>*)$EOS(<.space>*<lower>)/$0$1/;
 
   ## don't break: text . . some more text.
-  $s ~~ s:g/(<.space>'.'<.space>)$EOS(<.space>*)/$0$1/;
+  $s ~~ s:g/(<.space>'.'<.space>)$EOS(<.space>)/$0$1/;
   $s ~~ s:g/(<.space><.PAP><.space>)$EOS/$0/;
 
   return $s;

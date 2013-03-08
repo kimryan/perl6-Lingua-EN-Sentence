@@ -7,7 +7,7 @@ my @tests = dir 't/data', test => /'.txt' $$/;
 plan @tests.elems;
 
 
-for @tests -> $test {
+for @tests.sort -> $test {
  $test ~~ /(.+) '.txt' $$/;
  my $name = $0;
  my $text = slurp "t/data/$test";
@@ -22,7 +22,3 @@ for @tests -> $test {
  }
  is($expected_diff,$diff,$name);
 }
-
-# my $fh = open 't/data/new.sents', :w;
-# $fh.say( $text.sentences.join("\n-----\n") );
-# $fh.close();

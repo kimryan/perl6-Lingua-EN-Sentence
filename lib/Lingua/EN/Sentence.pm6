@@ -14,13 +14,13 @@ my @INSTITUTES = <dept univ assn bros>;
 my @COMPANIES = <inc ltd co corp>;
 my @PLACES = <arc al ave blv blvd cl ct cres dr exp expy dist mt ft fwy fy
  hwy hway la pd pde pl plz rd st tce Ala Ariz Ark Cal Calif Col Colo Conn
- Del Fed Fla Ga Ida Id Ill Ind Ia Kan Kans Ken Ky La Me Md Is Mass 
+ Del Fed Fla Ga Ida Id Ill Ind Ia Kan Kans Ken Ky La Md Is Mass 
  Mich Minn Miss Mo Mont Neb Nebr Nev Mex Okla Ok Ore Penna Penn Pa
  Dak Tenn Tex Ut Vt Va Wash Wis Wisc Wy Wyo USAFA Alta Man Ont Qué
- Sask Yuk>;
+ Sask Yuk>; # Me conflicts with me
 my @MATH = <fig eq sec i'.'e e'.'g P'-'a'.'s cf Thm Def Conj resp>;
 my @MONTHS = <jan feb mar apr may jun jul aug sep oct nov dec sept>;
-my @MISC = <vs no esp>;
+my @MISC = <vs no esp>; # etc causes more problems than it solves
 
 my Str @ABBREVIATIONS = (@PEOPLE, @ARMY, @INSTITUTES, @COMPANIES, @PLACES, @MONTHS, @MATH, @MISC ).map({.lc}).sort;
 my $acronym_regexp = array_to_regexp(@ABBREVIATIONS);
@@ -115,6 +115,7 @@ sub remove_false_end_of_sentence(Str $request) {
   ## fix where abbreviations exist
   $s ~~ s:g:i/<<(<$acronym_regexp> <.PAP> <.space>)$EOS/$0/;
   ## don't break after quote unless its a capital letter.
+  ## TODO: Need to work on balanced quotes, currently they fail.
   $s ~~ s:g/(<["']><.space>*)$EOS(<.space>*<lower>)/$0$1/;
 
   ## don't break: text . . some more text.

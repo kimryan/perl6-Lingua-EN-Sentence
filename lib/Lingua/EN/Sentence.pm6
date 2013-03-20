@@ -194,9 +194,13 @@ Lingua::EN::Sentence - Module for splitting text into sentences.
 =head1 SYNOPSIS
 
 	use Lingua::EN::Sentence;
-	add_acronyms('lt','gen');		## adding support for 'Lt. Gen.'
-	my $sentences=get_sentences($text);	## Get the sentences.
-	foreach my $sentence (@$sentences) {
+	add_acronyms('lt','gen');  ## adding support for 'Lt. Gen.'
+        # Perl5 API:
+	my @sentences=get_sentences($text);
+        # Perl6 API:
+        my @sentences=$text.sentences; # Needs a Str $text
+
+	foreach my @sentences -> $sentence {
 		## do something with $sentence
 	}
 
@@ -208,25 +212,40 @@ Certain well know exceptions, such as abreviations, may cause incorrect segmenta
 
 =head1 ALGORITHM
 
+Before any regex processing, quotations are hidden away and inserted after the sentences are split. That entails that no sentence splitting will be attempted between pairs of double quotes.
+
 Basically, I use a 'brute' regular expression to split the text into sentences.  (Well, nothing is yet split - I just mark the end-of-sentence).  Then I look into a set of rules which decide when an end-of-sentence is justified and when it's a mistake. In case of a mistake\, the end-of-sentence mark is removed. 
 
 What are such mistakes? Cases of abbreviations, for example. I have a list of such abbreviations (Please see `Acronym/Abbreviations list' section), and more general rules (for example, the abbreviations 'i.e.' and '.e.g.' need not to be in the list as a special rule takes care of all single letter abbreviations).
 
 =head1 FUNCTIONS
 
-All functions used should be requested in the 'use' clause. None is exported by default.
+=head2 $text.sentences
 
-=head2 get_sentences( $text )
+A very convenient extension to the Perl6 Str string type, 
+  the .sentences method allows to natively request the sentences in a string,
+  similarly to the Str "words" method.
 
-The get sentences function takes a scalar containing ascii text as an argument and returns a reference to an array of sentences that the text has been split into.
-Returned sentences will be trimmed (beginning and end of sentence) of white-spaces.
-Strings with no alpha-numeric characters in them, won't be returned as sentences.
+This is the recommended method when writing Perl6.
+
+=head2 get_sentences( Str $text )
+
+The get sentences function takes a Str variable containing the text
+  as an argument and returns an array of sentences that the text has been
+  split into.
+
+  Returned sentences will be trimmed (beginning and end of sentence) of
+  white-spaces.
+
+  Strings with no alpha-numeric characters in them, won't be returned as sentences.
 
 =head2 add_acronyms( @acronyms )
 
-This function is used for adding acronyms not supported by this code.  Please see `Acronym/Abbreviations list' section for the abbreviations already supported by this module.
+This function is used for adding acronyms not supported by this code.
+  Please see `Acronym/Abbreviations list' section for the abbreviations 
+  already supported by this module.
 
-=head2 get_acronyms(	)
+=head2 get_acronyms()
 
 This function will return the defined list of acronyms.
 
@@ -234,31 +253,13 @@ This function will return the defined list of acronyms.
 
 This function replaces the predefined acroym list with the given list.
 
-=head2 get_EOS(	)
+=head2 get_EOS()
 
 This function returns the value of the string used to mark the end of sentence. You might want to see what it is, and to make sure your text doesn't contain it. You can use set_EOS() to alter the end-of-sentence string to whatever you desire.
 
 =head2 set_EOS( $new_EOS_string )
 
-This function alters the end-of-sentence string used to mark the end of sentences. 
-
-=head2 set_locale( $new_locale )
-Revceives language locale in the form language.country.character-set
-for example:
-	"fr_CA.ISO8859-1"
-for Canadian French using character set ISO8859-1.
-
-Returns a reference to a hash containing the current locale formatting values.
-Returns undef if got undef.
-
-
-The following will set the LC_COLLATE behaviour to Argentinian Spanish. NOTE: The naming and avail­ ability of locales depends on your operating sys­ tem. Please consult the perllocale manpage for how to find out which locales are available in your system.
-
-$loc = set_locale( "es_AR.ISO8859-1" );
-
-This actually does this:
-
-$loc = setlocale( LC_ALL, "es_AR.ISO8859-1" );
+This function alters the end-of-sentence string used to mark the end of sentences.
 
 =head1 Acronym/Abbreviations list
 
@@ -266,7 +267,7 @@ You can use the get_acronyms() function to get acronyms.
 It has become too long to specify in the documentation.
 
 If I come across a good general-purpose list - I'll incorporate it into this module.
-Feel free to suggest such lists. 
+Feel free to suggest such lists.
 
 =head1 FUTURE WORK
 
@@ -274,6 +275,7 @@ Feel free to suggest such lists.
 [2] Supporting more than just English/French
 [3] Code optimization. Currently everything is RE based and not so optimized RE
 [4] Possibly use more semantic heuristics for detecting a beginning of a sentence
+[5] "is rw" text variables. Right now the text gets copied several times which is unnecessary overhead.
 
 =head1 SEE ALSO
 

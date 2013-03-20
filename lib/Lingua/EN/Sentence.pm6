@@ -47,9 +47,13 @@ sub set_EOS(Str $end_marker) is export {$EOS=$end_marker;}
 sub get_sentences(Str $text) is export {
   my @sentences;
   if ($text.defined) {
-    my $marked_text = first_sentence_breaking($text);
+    my $quoteless_text;
+    my @quotes;
+    ($quoteless_text, @quotes) = hide_quotes($text);
+    my $marked_text = first_sentence_breaking($quoteless_text);
     my $fixed_marked_text = remove_false_end_of_sentence($marked_text);
-    @sentences = clean_sentences(split(/$EOS/,$fixed_marked_text));
+    my $quoteful_text = show_quotes($fixed_marked_text,@quotes);
+    @sentences = clean_sentences(split(/$EOS/,$quoteful_text));
   }
   return @sentences;
 }
@@ -116,7 +120,7 @@ sub remove_false_end_of_sentence(Str $request) {
   $s ~~ s:g:i/<<(<$acronym_regexp> <.PAP> <.space>)$EOS/$0/;
   ## don't break after quote unless its a capital letter.
   ## TODO: Need to work on balanced quotes, currently they fail.
-  $s ~~ s:g/(<["']><.space>*)$EOS(<.space>*<lower>)/$0$1/;
+  $s ~~ s:g/(<["']><.space>*)$EOS(<.space>*<.lower>)/$0$1/;
 
   ## don't break: text . . some more text.
   $s ~~ s:g/(<.space>'.'<.space>)$EOS(<.space>)/$0$1/;
@@ -157,6 +161,27 @@ sub first_sentence_breaking(Str $request) {
   $text ~~ s:g/(<.PAP><.space>)/$0$EOS/;
   $text ~~ s:g/(<.space><.alpha><.termpunct>)/$0$EOS/; # breake also when single letter comes before punc.
   $text ~~ s:g/(<.alpha><.space><.termpunct>)/$0$EOS/; # Typos such as " arrived .Then "
+  return $text;
+}
+
+
+sub hide_quotes(Str $request) {
+  my $text = $request;
+  my Str @quotes;
+  while ($text ~~ s/('"' <-["]>+ '"')/XXXQUOTELESSXXX/) {
+    @quotes.push($0);
+  }
+  return ($text,@quotes);
+}
+
+sub show_quotes(Str $request, @quotes) {
+  my $text = $request;
+  if (@quotes.elems > 0) {
+    my $quote = @quotes.shift;
+    while ($text ~~ s/'XXXQUOTELESSXXX'/$quote/) {
+      $quote = @quotes.shift;
+    }
+  }
   return $text;
 }
 

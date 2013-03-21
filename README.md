@@ -4,7 +4,8 @@ perl6-Lingua-EN-Sentence
 Perl6 Port of the Lingua::EN::Sentence CPAN module
 
 The Port is complete, you're welcome to use the library in production code.
- Bug reports and feature requests are welcome in the Github Issue tracker.
+
+Bug reports and feature requests are welcome in the Github Issue tracker.
  
  Don't miss on using the fresh Perl6 syntax:
  ```

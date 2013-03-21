@@ -1,7 +1,7 @@
-Perl6: Lingua::EN::Sentence
+Lingua::EN::Sentence - Perl6 port
 ========================
 
-Perl6 Port of the Lingua::EN::Sentence CPAN module
+Perl6 port of the Lingua::EN::Sentence CPAN module
 
 The Port is complete, you're welcome to use the library in production code.
 

@@ -3,15 +3,13 @@ use Test;
 use Lingua::EN::Sentence;
 
 my @tests = dir 't/data', test => /'.txt' $$/;
-
 plan @tests.elems;
-
 
 for @tests.sort -> $test {
  $test ~~ /(.+) '.txt' $$/;
  my $name = $0;
- my $text = slurp "t/data/$test";
- my @sentences = slurp("t/data/$name.sents").split("\n-----\n");
+ my $text = slurp $test;
+ my @sentences = slurp("$name.sents").split("\n-----\n");
  my @new_sentences = $text.sentences;
  my Str $diff="\n";
  my Str $expected_diff="\n";

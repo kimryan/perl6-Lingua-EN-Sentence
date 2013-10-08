@@ -169,7 +169,7 @@ sub hide_quotes(Str $request) {
   my $text = $request;
   my Str @quotes;
   while ($text ~~ s/('"' <-["]>+ '"')/XXXQUOTELESSXXX/) {
-    @quotes.push($0);
+    @quotes.push($0.Str);
   }
   return ($text,@quotes);
 }

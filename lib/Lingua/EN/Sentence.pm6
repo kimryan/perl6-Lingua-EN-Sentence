@@ -76,7 +76,7 @@ augment class Str { method sentences { return get_sentences(self); } }
 # Compile the abbreviations array into a regexp, to gain performance
 sub array_to_regexp(Str @a) {
   # <$acronym_regexp> doesn't play nice with :i for now... working around it:
-  return eval("rx:i/" ~ array_to_rxstring(@a) ~ "/;");
+  return EVAL("rx:i/" ~ array_to_rxstring(@a) ~ "/;");
 }
 sub array_to_rxstring(Str @a) {
   return '' if @a.elems < 1;

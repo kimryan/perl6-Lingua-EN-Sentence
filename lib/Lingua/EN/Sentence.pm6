@@ -107,7 +107,7 @@ sub array_to_rxstring(Str @a) {
 sub remove_false_end_of_sentence(Str $request) {
   ## don't split at u.s.a.
   my $s = $request;
-  $s ~~ s:g/(<!&alphad>.<.alpha>(<.termpunct>[<.AP><space>]?))$EOS/$0/;
+  $s ~~ s:g/(<!&alphad>.<.alpha>(<&termpunct>[<&AP><space>]?))$EOS/$0/;
   # don't split after a white-space followed by a single letter followed
   # by a dot followed by another whitespace.
   $s ~~ s:g/(<.space><.alpha>'.'<.space>+)$EOS/$0/;
@@ -115,16 +115,16 @@ sub remove_false_end_of_sentence(Str $request) {
   # fix: bla bla... yada yada
   $s ~~ s:g/'...' $EOS <lower>/...$<lower>/;
   ## fix "." "?" "!"
-  $s ~~ s:g/(<['"]><.termpunct><['"]><.space>)$EOS/$0/;
+  $s ~~ s:g/(<['"]><&termpunct><['"]><.space>)$EOS/$0/;
   ## fix where abbreviations exist
-  $s ~~ s:g:i/<<(<$acronym_regexp> <.PAP> <.space>)$EOS/$0/;
+  $s ~~ s:g:i/<<(<$acronym_regexp> <&PAP> <.space>)$EOS/$0/;
   ## don't break after quote unless its a capital letter.
   ## TODO: Need to work on balanced quotes, currently they fail.
   $s ~~ s:g/(<["']><.space>*)$EOS(<.space>*<.lower>)/$0$1/;
 
   ## don't break: text . . some more text.
   $s ~~ s:g/(<.space>'.'<.space>)$EOS(<.space>)/$0$1/;
-  $s ~~ s:g/(<.space><.PAP><.space>)$EOS/$0/;
+  $s ~~ s:g/(<.space><&PAP><.space>)$EOS/$0/;
 
   return $s;
 }
@@ -156,11 +156,11 @@ sub clean_sentences(@sentences) {
 }
 
 sub first_sentence_breaking(Str $request) {
-  my Str $text = $request;
-  $text ~~ s:g/\n<.space>*\n/$EOS/; #double new-line means a different sentence.
-  $text ~~ s:g/(<.PAP><.space>)/$0$EOS/;
-  $text ~~ s:g/(<.space><.alpha><.termpunct>)/$0$EOS/; # breake also when single letter comes before punc.
-  $text ~~ s:g/(<.alpha><.space><.termpunct>)/$0$EOS/; # Typos such as " arrived .Then "
+  my $text = $request;
+  $text ~~ s:g/\n<.space>*\n/$EOS/;
+  $text ~~ s:g/(<&PAP><.space>)/$0$EOS/;
+  $text ~~ s:g/(<.space><.alpha><&termpunct>)/$0$EOS/; # breake also when single letter comes before punc.
+  $text ~~ s:g/(<.alpha><.space><&termpunct>)/$0$EOS/; # Typos such as " arrived .Then "
   return $text;
 }
 

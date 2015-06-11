@@ -1,4 +1,4 @@
-module Lingua::EN::Sentence:auth<LlamaRider>;
+unit module Lingua::EN::Sentence:auth<LlamaRider>;
 use v6;
 
 my Str $EOS="\0\0\0";

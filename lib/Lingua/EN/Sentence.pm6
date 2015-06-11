@@ -62,7 +62,7 @@ sub get_sentences(Str $text) is export {
 # augmenting the default Str class with a .sentences methods, 
 # for extra convenience. Sweet!
 #------------------------------------------------------------------------------
-use MONKEY_TYPING;
+use MONKEY-TYPING;
 augment class Str { method sentences { return get_sentences(self); } }
 
 #==============================================================================

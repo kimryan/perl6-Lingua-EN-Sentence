@@ -1,22 +1,22 @@
-  Lingua::EN::Sentence - Module for splitting text into sentences.
+Lingua::EN::Sentence - Module for splitting text into sentences.
 
 SYNOPSIS
 ```raku
-	use Lingua::EN::Sentence;
-	add_acronyms('lt','gen');  ## adding support for 'Lt. Gen.'
+use Lingua::EN::Sentence;
+add_acronyms('lt','gen');  ## adding support for 'Lt. Gen.'
  
- $text = Q[First sentence with some abbreviations,  Mr. J. Smith, 2 Jones St. SomeTown Ariz. U.S.A. is an address.
+$text = Q[First sentence with some abbreviations,  Mr. J. Smith, 2 Jones St. SomeTown Ariz. U.S.A. is an address.
 Sentence 2: Sequences like ellipsis ... OR . . are handled. Sentence 3, numbered sections such as point 1. are ok.];
 my @sentences = $text.sentences;
 for @sentences -> $sub-element {
     say $sub-element;
 }
-```
 
 Output is:
 First sentence with some abbreviations,  Mr. J. Smith, 2 Jones St. SomeTown Ariz. U.S.A. is an address.
 Sentence 2: Sequences like ellipsis ... OR . . are handled.
 Sentence 3, numbered sections such as point 1. are ok.
+```
 
 DESCRIPTION
 

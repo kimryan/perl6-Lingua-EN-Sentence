@@ -1,8 +1,8 @@
 {
   "name": "Lingua::EN::Sentence",
-  "source-url": "git://github.com/dginev/perl6-Lingua-EN-Sentence.git",
+  "source-url": "git://github.com/kimryan/perl6-Lingua-EN-Sentence.git", 
   "perl": "6.*",
-  "author": "Deyan Ginev",
+  "author": "Kim Ryan",
   "depends": [
     
   ],
@@ -10,6 +10,6 @@
   "provides": {
     "Lingua::EN::Sentence": "lib/Lingua/EN/Sentence.pm6"
   },
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Module for splitting text into sentences"
 }

@@ -8,7 +8,9 @@ as well as common abbreviations such as Mr. J. Smith, 2 Jones St.   Ariz.   XYZ 
 Sequences like ellipsis ... OR . . will not cause a split.
 -----
 A sentence ending in an acronym does not cause a split such as St. There are 
-"Some valid cases cannot be detected", such as so said I. This cannot easily be separated
+"Some valid cases cannot be detected", such as so said I.
+-----
+This cannot easily be separated
  from a valid single letter-dot sequence like the initial for a person's given name.
 -----
 Numbered sections such as point 1. within a sentence will not cause a split.

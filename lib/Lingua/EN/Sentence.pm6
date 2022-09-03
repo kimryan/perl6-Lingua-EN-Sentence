@@ -98,9 +98,9 @@ sub mark_up_false_stops(Str $request) {
   $text ~~ s:g/(<space>)(<digit>+)'.'(<space><lower>)/$0$1$DOT$2/;
   
   # Mark up acromyms
-  $text ~~ s:g/<space>(<alpha>)'.'(<alpha>)'.'(<alpha>)'.'(<alpha>)'.'<space>/ $0$DOT$1$DOT$2$DOT$3$DOT /; # A.B.C.D.
-  $text ~~ s:g/<space>(<alpha>)'.'(<alpha>)'.'(<alpha>)'.'<space>/ $0$DOT$1$DOT$2$DOT /; # such as U.S.A.
-  $text ~~ s:g/<space>(<alpha>)'.'(<alpha>)'.'<space>/ $0$DOT$1$DOT /; # such as U.K. Also handles 2 initials in a persons name
+  $text ~~ s:g/<space>(<alpha>)'.'(<alpha>)'.'(<alpha>)'.'(<alpha>)'.'(','?)<space>/ $0$DOT$1$DOT$2$DOT$3$DOT$4 /; # A.B.C.D. optionally folowed by ,
+  $text ~~ s:g/<space>(<alpha>)'.'(<alpha>)'.'(<alpha>)'.'(','?)<space>/ $0$DOT$1$DOT$2$DOT$3 /; # such as U.S.A.
+  $text ~~ s:g/<space>(<alpha>)'.'(<alpha>)'.'(','?)<space>/ $0$DOT$1$DOT$2 /; # such as U.K. Also handles 2 initials in a persons name
   
   # First mark dots belonging to a persons' initials such as Mr A. Smith
   my @TITLE = <Mr Mrs Ms Dr Prof Mme Mgr Msgr>;  

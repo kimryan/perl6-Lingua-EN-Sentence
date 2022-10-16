@@ -13,7 +13,7 @@ my token PAP { <termpunct> <AP> };
 my token alphad { <.alpha>|'-' }
 
 
-# NOTE: all abbreviations are case senstitive, specify lower case first letter only when needed
+# NOTE: all abbreviations are case sensitive, specify lower case first letter only when needed
 my @PEOPLE = <Mr Mrs Ms Dr Prof Mme Mgr Msgr Sen Sens Rep Reps Gov Atty Artts Supt Insp Const Det Rev Revd Ald Rt Hon>;
 my @TITLE_SUFFIXES = <PhD Jr Jnr Sn Snr Esq MD LLB>;
 my @ARMY = <Col Gen Lt Cm?dr Adm Capt Sgt Cpl Maj Pte>;
@@ -46,7 +46,7 @@ sub set_EOS(Str $end_marker) is export {$EOS=$end_marker;}
 
 #------------------------------------------------------------------------------
 #`[
-get_sentences - takes text input and splits it into sentences.
+sentences - takes text input and splits it into sentences.
 Firstly, letters and full stops sequences that don't end a sentence
 are tranformed into another symbol.
 A regular expression  cuts the text into sentences, and then a list
@@ -54,7 +54,7 @@ of rules is applied on the marked text in order to fix end-of-sentence
 markings in places which are not indeed end-of-sentence.
 ]
 
-sub get_sentences(Str $text) is export {
+sub sentences(Str $text) is export {
   my @sentences;
   if ($text.defined) {
     my $marked_text = mark_up_false_stops($text);
@@ -81,7 +81,7 @@ sub get_sentences(Str $text) is export {
 #------------------------------------------------------------------------------
 use MONKEY-TYPING;
 use MONKEY-SEE-NO-EVAL;
-augment class Str { method sentences { return get_sentences(self); } }
+augment class Str { method sentences { return sentences(self); } }
 
 #==============================================================================
 #

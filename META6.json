@@ -8,7 +8,7 @@
   ],
   "license": "Artistic-2.0",
   "provides": {
-    "Lingua::EN::Sentence": "lib/Lingua/EN/Sentence.pm6"
+    "Lingua::EN::Sentence": "lib/Lingua/EN/Sentence.rakumod"
   },
   "tags": [
     "NLP",

@@ -26,7 +26,8 @@ The Lingua::EN::Sentence module contains the method sentences, which
 splits text into its constituent sentences, based on  regular expressions,
 a list of abbreviations (built in and given) and other rules.
 
-Certain well know exceptions, such as abreviations like Mr., Calif. and Ave. will
+Certain well know exceptions, such as abbreviations like Mr., Calif. and Ave. will
 cause incorrect segmentations. But many of these are already integrated into this
-code and are being taken care of. Still, if you see that there are words causing
-the sentences() to fail, you can add those to the module, so it notices them.
+code and are being taken care of. Note that abbreviations are case sensitive.
+
+The add_acronyms method alows you to add custom abbreviations.

@@ -2,11 +2,11 @@
   "name": "Lingua::EN::Sentence",
   "source-url": "git://github.com/kimryan/perl6-Lingua-EN-Sentence.git", 
   "raku": "6.d",
-  "auth": "github:kimryan",
+  "auth": "zef:kimryan",
   "author": "Kim Ryan",
-  "depends": [
-    
-  ],
+  "depends": [ ],
+  "build-depends" : [ ],
+  "test-depends" : [ ],
   "license": "Artistic-2.0",
   "provides": {
     "Lingua::EN::Sentence": "lib/Lingua/EN/Sentence.rakumod"

@@ -1,6 +1,7 @@
 use v6;
 
-unit module Lingua::EN::Sentence:auth<LlamaRider>;
+unit module Lingua::EN::Sentence:ver<0.1.5>:auth<zef:kimryan>;
+
 my $VERBOSE = 0;
 my Str $EOS = "__EOS__";
 my Str $ELLIPSIS = "__ELLIPSIS__";
@@ -39,7 +40,7 @@ sub add_acronyms(*@new_acronyms) is export {
  }
 sub get_acronyms() is export {return @ABBREVIATIONS;}
 sub set_acronyms(*@new_acronyms) is export {
-  @ABBREVIATIONS=@new_acronyms;
+  @ABBREVIATIONS = @new_acronyms;
 }
 sub get_EOS() is export {return $EOS;}
 sub set_EOS(Str $end_marker) is export {$EOS=$end_marker;}
@@ -74,20 +75,21 @@ sub sentences(Str $text) is export {
   }
   return @sentences;
 }
-
-#------------------------------------------------------------------------------
-# augmenting the default Str class with a .sentences methods, 
-# for extra convenience. Sweet!
+#`[ Augmenting the default Str class with a .sentences methods, 
+for extra convenience. Sweet!
+]
 #------------------------------------------------------------------------------
 use MONKEY-TYPING;
 use MONKEY-SEE-NO-EVAL;
 augment class Str { method sentences { return sentences(self); } }
 
-#==============================================================================
-#
-# Private methods
-#
-#==============================================================================
+#`[
+
+Private methods
+
+==============================================================================
+
+]
 
 sub mark_up_false_stops(Str $request) {
   my $text = $request;
@@ -187,8 +189,6 @@ sub remove_markup(@sentences) {
 sub clean_sentences(@sentences) {
   return @sentences.grep({.defined and .match(/<.alpha>/)}).map:{.trim };
 }
-
-
 
 sub show_quotes(Str $request, Str @quotes) {
   my $text = $request;

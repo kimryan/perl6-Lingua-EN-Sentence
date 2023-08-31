@@ -8,23 +8,23 @@ Lingua::EN::Sentence - Module for splitting text into sentences.
 
 =begin code :lang<raku>
 
-	use Lingua::EN::Sentence;
-	add_acronyms('lt','gen');  ## adding support for 'Lt. Gen.'
+use Lingua::EN::Sentence;
+add_acronyms(' Lt Gen');  ## adding support for 'Lt. Gen.' 
  
 $text = Q[First sentence with some abbreviations,  Mr. J. Smith, 2 Jones St. SomeTown Ariz. U.S.A. is an address.
 Sentence 2: Sequences like ellipsis ... are handled. Sentence 3, numbered sections such as point 1. are ok.];
 my @sentences = $text.sentences;
-for @sentences -> $sub-element {
-    say $sub-element;
+for @sentences -> $sent {
+    say $sent;
 }
-#`[
+=end code
+
 Output is:
+
 First sentence with some abbreviations,  Mr. J. Smith, 2 Jones St. SomeTown Ariz. U.S.A. is an address.
 Sentence 2: Sequences like ellipsis ... are handled.
 Sentence 3, numbered sections such as point 1. are ok.
-]
 
-=end code
 
 =head1 DESCRIPTION
 
@@ -36,7 +36,7 @@ Certain well know exceptions, such as abbreviations like Mr., Calif. and Ave. wi
 cause incorrect segmentations. But many of these are already integrated into this
 code and are being taken care of. Note that abbreviations are case sensitive.
 
-The add_acronyms method alows you to add custom abbreviations.
+The add_acronyms method allows you to add custom abbreviations.
 
 =head1 ALGORITHM
 
@@ -85,7 +85,7 @@ This function will return the defined list of acronyms.
 
 =head2 set_acronyms( @my_acronyms )
 
-This function replaces the predefined acroym list with the given list.
+This function replaces the predefined acroynm list with the given list.
 
 =head2 get_EOS()
 
@@ -106,19 +106,18 @@ If I come across a good general-purpose list - I'll incorporate it into this mod
 Feel free to suggest such lists.
 
 =head1 Limitations
+
 There are some valid cases cannot be detected, such as:
 This belongs to John A. Smith, which will break after A.
 This cannot  be distinguished from a valid sequence like so said I. Next sentence.
 A sentence ending in an acronym does not cause a split such as St.
 
-
 =head1 AUTHOR
 
 Deyan Ginev, 2013.
-Kim Ryan, 2022
+Kim Ryan, 2023
 
-Perl5 CPAN author:
- Shlomo Yona (shlomo@cs.haifa.ac.il)
+Perl5 CPAN author: Shlomo Yona (shlomo@cs.haifa.ac.il)
 
 Released under the same terms as Perl 6; see the LICENSE file for details.
 
